@@ -48,7 +48,9 @@ const Home = (props: Props) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const scrollY = useRef(new RNAnimated.Value(10)).current;
-  const geometricScrollY = useRef(new RNAnimated.Value(20)).current;
+  const translateX = useRef(new RNAnimated.Value(0)).current;
+  const translateXMinus = useRef(new RNAnimated.Value(0)).current;
+  const separationHeight = useRef(new RNAnimated.Value(48)).current;
   const scrollHandler = RNAnimated.event(
     [{nativeEvent: {contentOffset: {y: scrollY}}}],
     {
@@ -57,6 +59,50 @@ const Home = (props: Props) => {
   );
 
   const AnimatedFlatList = RNAnimated.createAnimatedComponent(FlatList<IData>);
+
+  const handleTranslateXGeometricShapes = () => {
+    RNAnimated.timing(translateX, {
+      toValue: 1,
+      duration: 100,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start(() => {
+      RNAnimated.timing(translateX, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.inOut(Easing.exp),
+        useNativeDriver: true,
+      }).start();
+    });
+
+    RNAnimated.timing(translateXMinus, {
+      toValue: -1,
+      duration: 100,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start(() => {
+      RNAnimated.timing(translateXMinus, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.inOut(Easing.exp),
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
+  const handleSeparationHeight = () => {
+    RNAnimated.timing(separationHeight, {
+      toValue: 20,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => {
+      RNAnimated.timing(separationHeight, {
+        toValue: 48,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    });
+  };
 
   return (
     <View className={`flex-1`}>
@@ -79,7 +125,7 @@ const Home = (props: Props) => {
         renderItem={({item, index}) => {
           const translateY = scrollY.interpolate({
             inputRange: [-100, index * 400],
-            outputRange: [-index * 70, -20],
+            outputRange: [-(index + 0.1) * 70, -20],
             extrapolate: 'extend',
           });
           const translateYCircle = scrollY.interpolate({
@@ -87,6 +133,19 @@ const Home = (props: Props) => {
             outputRange: [index * 20, -40],
             extrapolate: 'extend',
           });
+
+          const translateXInterpolate = translateX.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 30],
+          });
+          const translateXMinusInterpolate = translateXMinus.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 30],
+          });
+          const handleCardPress = () => {
+            handleTranslateXGeometricShapes();
+            handleSeparationHeight();
+          };
           return (
             <View className={`relative`}>
               {item.shapes &&
@@ -97,10 +156,18 @@ const Home = (props: Props) => {
                       type={itm.name}
                       image={itm.image}
                       translateY={translateYCircle}
+                      translateX={translateXInterpolate}
+                      translateXMinus={translateXMinusInterpolate}
                     />
                   );
                 })}
-              <Card index={index} translateY={translateY} item={item} />
+              <Card
+                index={index}
+                translateY={translateY}
+                onPress={handleCardPress}
+                item={item}
+                separationHeight={separationHeight}
+              />
             </View>
           );
         }}

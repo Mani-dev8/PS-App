@@ -1,30 +1,62 @@
-import {View, Text, Animated} from 'react-native';
+import {View, Text, Animated as RNAnimated} from 'react-native';
 import React from 'react';
 import classNames from 'classnames';
 import {IData, TGeometricShape} from '../../utils';
-
+import Animated from 'react-native-reanimated';
 type Props = {
   type: TGeometricShape;
   image: any;
-  translateY: Animated.AnimatedInterpolation<string | number>;
+  translateY: RNAnimated.AnimatedInterpolation<string | number>;
+  translateX: RNAnimated.AnimatedInterpolation<string | number>;
+  translateXMinus: RNAnimated.AnimatedInterpolation<string | number>;
 };
-//absolute w-48 h-36 z-40 -left-20 top-20
-const GeometricShapes = ({type, image, translateY}: Props) => {
+const GeometricShapes = ({
+  type,
+  image,
+  translateY,
+  translateX,
+  translateXMinus,
+}: Props) => {
   return (
-    <View
+    <RNAnimated.View
       className={classNames('absolute z-50', {
         'w-48 h-48 -left-16 top-28': type === 'circle',
         'w-32 h-32 -right-6 bottom-10': type === 'square',
         'w-44 h-44 -right-6 -bottom-20': type === 'plus',
         'w-32 h-32 -left-5 top-10': type === 'triangle',
-      })}>
-      <Animated.Image
+      })}
+      style={
+        type === 'triangle'
+          ? {
+              transform: [
+                {
+                  translateX: translateX,
+                },
+              ],
+            }
+          : type === 'circle'
+          ? {
+              transform: [
+                {
+                  translateX: translateX,
+                },
+              ],
+            }
+          : {
+              transform: [
+                {
+                  translateX: translateXMinus,
+                },
+              ],
+            }
+      }>
+      <RNAnimated.Image
         source={image}
         className={`h-full w-full`}
         resizeMode={'contain'}
         style={{transform: [{translateY}]}}
       />
-    </View>
+    </RNAnimated.View>
   );
 };
 
